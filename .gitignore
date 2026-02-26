@@ -1,0 +1,21 @@
+# Rust artifacts
+/target
+Cargo.lock
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Liferay/Docker specific local ignores
+/bundles
+/deploy
+/osgi/state
+*.log
+*.bak
+.env
