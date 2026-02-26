@@ -1,6 +1,6 @@
 # Rust artifacts
 /target
-Cargo.lock
+**/*.rs.bk
 
 # IDEs
 .idea/
@@ -12,10 +12,18 @@ Cargo.lock
 .DS_Store
 Thumbs.db
 
-# Liferay/Docker specific local ignores
+# Secrets & Local Environment
+.env
+.env.*
+*.key
+temp_key.txt
+secrets.json
+
+# Liferay / Mock Output (in case you dump payloads locally for debugging)
+*.lar
+*.json
 /bundles
 /deploy
 /osgi/state
 *.log
 *.bak
-.env

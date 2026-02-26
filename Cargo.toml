@@ -1,11 +1,16 @@
 [package]
-name = "lfr-tool-template"
+name = "lfr-mock-gen"
 version = "0.1.0"
 edition = "2021"
 authors = ["Peter Richards"]
-description = "A modular template for Liferay Rust CLI tools with XML and Workspace support."
+description = "A blazing-fast Rust CLI tool that uses Gemini AI to generate realistic mock Web Content and pushes it directly to Liferay via Headless REST APIs."
 
 [dependencies]
+# HTTP & Async (Moved from [package])
+reqwest = { version = "0.11", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+base64 = "0.21"
+
 # CLI Argument parsing
 clap = { version = "4.4", features = ["derive"] }
 

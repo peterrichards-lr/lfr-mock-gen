@@ -1,8 +1,8 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "lfr-tool")]
-#[command(about = "Generic Liferay Rust Tool", long_about = None)]
+#[command(name = "lfr-mock-gen")] 
+#[command(about = "Liferay Mock Content Generator via Gemini", long_about = None)]
 pub struct App {
     #[command(subcommand)]
     pub command: AppCommands,
@@ -10,14 +10,27 @@ pub struct App {
 
 #[derive(Subcommand)]
 pub enum AppCommands {
-    /// Generic environment command
     Env {
         #[arg(short, long)]
         target: Option<String>,
     },
-    /// Generic data command
     Data {
-        #[arg(long)]
+        #[arg(long, help = "Force operation")]
         force: bool,
+
+        #[arg(long, help = "Environment variable name containing the Gemini API key")]
+        api_env: String,
+
+        #[arg(long, help = "Liferay Site ID (groupId)")]
+        group_id: u64,
+
+        #[arg(long, help = "Liferay Host URL (e.g., http://localhost:8080)")]
+        liferay_url: String,
+
+        #[arg(long, help = "Liferay Basic Auth username (e.g., test@liferay.com)")]
+        liferay_user: String,
+
+        #[arg(long, help = "Liferay Basic Auth password")]
+        liferay_pass: String,
     },
 }
