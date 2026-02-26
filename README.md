@@ -1,44 +1,18 @@
-# Liferay Rust Tool Template
+## Liferay Mock Content Generator (Gemini Integration)
 
-A template for building high-performance, cross-platform CLI tools for Liferay DXP development and operations.
+This repository includes a powerful CLI tool built in Rust that automatically generates realistic mock data for Liferay using the Gemini AI API. It creates 20 Basic Web Content articles, populates them with unique AI-generated titles, descriptions, and body paragraphs, and injects open-source placeholder images.
 
-## Features
+The tool uses Liferay's Headless Delivery REST APIs to push the content directly into your chosen Site, completely bypassing the need for complex `.lar` file imports or Groovy scripts.
 
-- **Cross-Platform:** Pre-configured GitHub Actions to build for Windows, Linux, and macOS (ARM/Intel).
-- **Liferay Aware:** Standardized logic for path resolution and `portal-ext.properties` parsing.
-- **Modern CLI:** Built on `clap` for a professional command-line experience.
+### Prerequisites
 
-## Project Structure
+1. **Rust and Cargo**: Ensure you have the latest stable version of Rust installed.
+2. **Gemini API Key**: You will need a free API key from Google AI Studio.
+3. **Liferay DXP/CE**: A running instance of Liferay 7.3+ (requires the Headless Delivery APIs).
 
-```plaintext
-.
-├── .github/workflows/release.yml # Multi-OS CI/CD
-├── src/
-│   ├── main.rs          # Command routing
-│   ├── core/
-│   │   ├── mod.rs       # Core traits (Interchangeable)
-│   │   └── env.rs       # Local Filesystem Adapter (Optional)
-│   ├── utils/
-│   │   ├── mod.rs       # Utility re-exports
-│   │   └── xml.rs       # Recursive XML logic (Tomcat/Docker Configs)
-│   └── cli.rs           # Multi-tool command definitions
-├── .gitignore
-├── Cargo.toml
-└── LICENSE (MIT)
-```
+### Installation & Build
 
-## Getting Started
-
-1. Click **"Use this template"** on GitHub.
-2. Update the `name` and `description` in `Cargo.toml`.
-3. Customize the subcommands in `src/main.rs`.
-4. Push a tag (e.g., `v1.0.0`) to trigger the automated release.
-
-## Development
+Compile the application for release to ensure maximum performance:
 
 ```bash
-# Build locally
-cargo build
-
-# Run with arguments
-cargo run -- --help
+cargo build --release
