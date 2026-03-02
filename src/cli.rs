@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "lfr-mock-gen")] 
+#[command(name = "lfr-mock-gen")]
 #[command(about = "Liferay Mock Content Generator via Gemini", long_about = None)]
 pub struct App {
     #[command(subcommand)]
@@ -32,5 +32,8 @@ pub enum AppCommands {
 
         #[arg(long, help = "Liferay Basic Auth password")]
         liferay_pass: String,
+
+        #[arg(long, help = "Liferay Content Structure ID or Name")]
+        structure_id: String,
     },
 }
