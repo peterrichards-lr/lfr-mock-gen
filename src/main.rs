@@ -31,10 +31,12 @@ async fn main() -> anyhow::Result<()> {
             liferay_user,
             liferay_pass,
             structure_id,
+            tone,
+            purpose,
         } => {
             println!(
-                "Data operation initiated (Force={}, Structure ID/Name={})",
-                force, structure_id
+                "Data operation initiated (Force={}, Structure ID/Name={}, Tone={}, Purpose={})",
+                force, structure_id, tone, purpose
             );
 
             generate_mock_data(
@@ -44,6 +46,8 @@ async fn main() -> anyhow::Result<()> {
                 &liferay_user,
                 &liferay_pass,
                 &structure_id,
+                &tone,
+                &purpose,
             )
             .await?;
         }
@@ -223,6 +227,8 @@ async fn generate_mock_data(
     liferay_user: &str,
     liferay_pass: &str,
     structure_identifier: &str,
+    tone: &str,
+    purpose: &str,
 ) -> anyhow::Result<()> {
     let api_key = env::var(api_env).map_err(|_| {
         anyhow::anyhow!(
@@ -259,16 +265,16 @@ async fn generate_mock_data(
     );
 
     let prompt = format!(
-        "Generate 5 realistic and diverse mock web content articles. \
+        "Generate 5 realistic and diverse mock {} entries with a {} tone. \
         Return EXACTLY a JSON array of objects that strictly follow this JSON schema: \n{}\n\
         GUIDELINES:\n\
-        - Use creative and varied titles and descriptions.\n\
+        - Use creative and varied titles and descriptions suitable for a {}.\n\
         - For 'string' fields that look like content (e.g., 'body', 'content'), include realistic HTML with <p>, <h2>, <ul> tags.\n\
         - For 'image' fields, provide a unique URL from https://picsum.photos/ (e.g., https://picsum.photos/seed/abc/800/400).\n\
         - For 'date' fields, use ISO 8601 format (YYYY-MM-DD).\n\
         - Ensure numerical values are within realistic ranges.\n\
         - DO NOT include markdown formatting, backticks, or any text other than the JSON array.",
-        schema_str
+        purpose, tone, schema_str, purpose
     );
 
     let gemini_payload = json!({
