@@ -8,8 +8,6 @@ on:
 jobs:
   build-release:
     name: Build (${{ matrix.target }})
-    # Prevents the template itself from creating releases
-    if: github.repository != 'peterrichards-lr/lfr-rust-template'
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -20,16 +18,16 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: lfr-tool
-            asset_name: lfr-tool-linux-x86_64.tar.gz
+            artifact_name: lfr-mock-gen
+            asset_name: lfr-mock-gen-linux-x86_64.tar.gz
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: lfr-tool
-            asset_name: lfr-tool-macos-arm64.tar.gz
+            artifact_name: lfr-mock-gen
+            asset_name: lfr-mock-gen-macos-arm64.tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: lfr-tool.exe
-            asset_name: lfr-tool-windows-x86_64.zip
+            artifact_name: lfr-mock-gen.exe
+            asset_name: lfr-mock-gen-windows-x86_64.zip
 
     steps:
       - name: Checkout repository

@@ -3,7 +3,8 @@ mod core;
 mod utils;
 
 use crate::cli::{App, AppCommands};
-use crate::core::{LiferayWorkspace, Workspace};
+use crate::core::{LiferayProject, Workspace};
+use crate::utils::xml;
 use clap::Parser;
 use reqwest::Client;
 use serde_json::json;
@@ -13,15 +14,15 @@ use std::env;
 async fn main() -> anyhow::Result<()> {
     let args = App::parse();
 
-    let ws = LiferayWorkspace {
+    let ws = LiferayProject {
         current_dir: std::env::current_dir().unwrap_or_default(),
     };
 
     match args.command {
         AppCommands::Env { target } => {
-            let root = ws.find_root().map_err(anyhow::Error::msg)?;
+            let root = ws.find_root()?;
             println!("Environment check for {:?} in root: {:?}", target, root);
-            let _ = utils::find_elements_by_name;
+            let _ = xml::find_elements_by_name;
         }
         AppCommands::Data {
             force,

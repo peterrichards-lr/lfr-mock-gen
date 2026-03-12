@@ -1,2 +1,3 @@
 pub mod env;
-pub use env::{LiferayWorkspace, Workspace};
+
+pub use env::{LiferayProject, Workspace};
