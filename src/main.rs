@@ -221,6 +221,7 @@ fn normalize_structure_to_schema(structure: &serde_json::Value) -> serde_json::V
 }
 
 /// Handles fetching data from Gemini and pushing it to Liferay
+#[allow(clippy::too_many_arguments)]
 async fn generate_mock_data(
     api_env: &str,
     group_id: u64,

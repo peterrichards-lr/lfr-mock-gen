@@ -36,10 +36,18 @@ pub enum AppCommands {
         #[arg(long, help = "Liferay Content Structure ID or Name")]
         structure_id: String,
 
-        #[arg(long, help = "The tone of the generated content (e.g., professional, casual, humorous)", default_value = "professional")]
+        #[arg(
+            long,
+            help = "The tone of the generated content (e.g., professional, casual, humorous)",
+            default_value = "professional"
+        )]
         tone: String,
 
-        #[arg(long, help = "The purpose/type of the content (e.g., Blog, FAQ, News, Events)", default_value = "Blog")]
+        #[arg(
+            long,
+            help = "The purpose/type of the content (e.g., Blog, FAQ, News, Events)",
+            default_value = "Blog"
+        )]
         purpose: String,
     },
 }
