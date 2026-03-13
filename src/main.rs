@@ -21,7 +21,20 @@ async fn main() -> anyhow::Result<()> {
     match args.command {
         AppCommands::Env { target } => {
             let root = ws.find_root()?;
+            let project_type = ws.detect_type(&root);
+            let liferay_version = ws.get_liferay_version(&root);
+
             println!("Environment check for {:?} in root: {:?}", target, root);
+            println!("Project type detected: {:?}", project_type);
+
+            if let Some(version) = liferay_version {
+                println!("Liferay version: {}", version);
+            }
+
+            if let Ok(tomcat_path) = ws.find_tomcat(&root) {
+                println!("Tomcat directory: {:?}", tomcat_path);
+            }
+
             let _ = xml::find_elements_by_name;
         }
         AppCommands::Data {
