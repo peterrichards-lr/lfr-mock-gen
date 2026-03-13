@@ -6,12 +6,10 @@ on:
       - 'v*'
 
 jobs:
-  build-release:
+  build:
     name: Build (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
-    
+
     strategy:
       fail-fast: false
       matrix:
@@ -54,10 +52,35 @@ jobs:
           cd target/${{ matrix.target }}/release
           Compress-Archive -Path ${{ matrix.artifact_name }} -DestinationPath ../../../${{ matrix.asset_name }}
 
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.asset_name }}
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: assets
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ matrix.asset_name }}
+          files: assets/*
           generate_release_notes: true
           draft: false
           prerelease: false
+
