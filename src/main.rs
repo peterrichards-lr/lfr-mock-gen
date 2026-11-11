@@ -1,10 +1,8 @@
 mod cli;
-mod core;
-mod utils;
+mod structures;
 
 use crate::cli::{App, AppCommands};
-use crate::core::{LiferayProject, Workspace};
-use crate::utils::xml;
+use crate::structures::{find_structure, HttpStructureApi};
 use clap::Parser;
 use reqwest::Client;
 use serde_json::json;
@@ -14,43 +12,21 @@ use std::env;
 async fn main() -> anyhow::Result<()> {
     let args = App::parse();
 
-    let ws = LiferayProject {
-        current_dir: std::env::current_dir().unwrap_or_default(),
-    };
-
     match args.command {
-        AppCommands::Env { target } => {
-            let root = ws.find_root()?;
-            let project_type = ws.detect_type(&root);
-            let liferay_version = ws.get_liferay_version(&root);
-
-            println!("Environment check for {:?} in root: {:?}", target, root);
-            println!("Project type detected: {:?}", project_type);
-
-            if let Some(version) = liferay_version {
-                println!("Liferay version: {}", version);
-            }
-
-            if let Ok(tomcat_path) = ws.find_tomcat(&root) {
-                println!("Tomcat directory: {:?}", tomcat_path);
-            }
-
-            let _ = xml::find_elements_by_name;
-        }
         AppCommands::Data {
-            force,
             api_env,
             group_id,
             liferay_url,
             liferay_user,
             liferay_pass,
             structure_id,
+            global_site_id,
             tone,
             purpose,
         } => {
             println!(
-                "Data operation initiated (Force={}, Structure ID/Name={}, Tone={}, Purpose={})",
-                force, structure_id, tone, purpose
+                "Data operation initiated (Structure ID/Name={}, Tone={}, Purpose={})",
+                structure_id, tone, purpose
             );
 
             generate_mock_data(
@@ -60,6 +36,7 @@ async fn main() -> anyhow::Result<()> {
                 &liferay_user,
                 &liferay_pass,
                 &structure_id,
+                global_site_id,
                 &tone,
                 &purpose,
             )
@@ -68,55 +45,6 @@ async fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
-}
-
-/// Helper function to find the Content Structure by its ID or Name and return its full definition
-async fn get_structure_definition(
-    client: &Client,
-    liferay_url: &str,
-    group_id: u64,
-    liferay_user: &str,
-    liferay_pass: &str,
-    identifier: &str,
-) -> anyhow::Result<serde_json::Value> {
-    // Fetch all structures for the site
-    let get_url = format!(
-        "{}/o/headless-delivery/v1.0/sites/{}/content-structures",
-        liferay_url.trim_end_matches('/'),
-        group_id
-    );
-
-    let res = client
-        .get(&get_url)
-        .basic_auth(liferay_user, Some(liferay_pass))
-        .send()
-        .await?;
-
-    if res.status().is_success() {
-        let text = res.text().await?;
-        let json: serde_json::Value = serde_json::from_str(&text)?;
-
-        if let Some(items) = json["items"].as_array() {
-            for item in items {
-                let id = item["id"]
-                    .as_u64()
-                    .map(|v| v.to_string())
-                    .unwrap_or_default();
-                let name = item["name"].as_str().unwrap_or_default();
-
-                if id == identifier || name == identifier {
-                    println!("✅ Found Content Structure '{}' (ID: {})", name, id);
-                    return Ok(item.clone());
-                }
-            }
-        }
-    }
-
-    anyhow::bail!(
-        "❌ Content Structure '{}' not found in Site ID {}.",
-        identifier,
-        group_id
-    )
 }
 
 /// Normalizes a Liferay Content Structure into a simple JSON Schema for Gemini
@@ -265,6 +193,7 @@ async fn generate_mock_data(
     liferay_user: &str,
     liferay_pass: &str,
     structure_identifier: &str,
+    global_site_id: Option<u64>,
     tone: &str,
     purpose: &str,
 ) -> anyhow::Result<()> {
@@ -278,15 +207,13 @@ async fn generate_mock_data(
     let client = Client::new();
 
     // 1. Get the structure definition
-    let structure = get_structure_definition(
-        &client,
-        liferay_url,
-        group_id,
-        liferay_user,
-        liferay_pass,
-        structure_identifier,
-    )
-    .await?;
+    let api = HttpStructureApi {
+        client: &client,
+        base_url: liferay_url,
+        user: liferay_user,
+        pass: liferay_pass,
+    };
+    let structure = find_structure(&api, group_id, global_site_id, structure_identifier).await?;
 
     let structure_id = structure["id"]
         .as_u64()
