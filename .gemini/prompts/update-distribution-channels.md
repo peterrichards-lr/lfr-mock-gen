@@ -9,50 +9,67 @@ When a user asks you to "update the distribution channels," "update homebrew and
 
 ### 1. Extract Metadata
 Read `Cargo.toml` to extract:
-- `name` (This is the `REPO_NAME` and `BINARY_NAME`)
+- `name` (This is the `BINARY_NAME`, the command users install. The formula and manifest are named after it.)
 - `version` (`VERSION`)
 - `description` (`DESCRIPTION`)
-- `repository` (Extract the `GITHUB_USER` and ensure `REPO_NAME` matches)
+- `repository` (Extract the `GITHUB_USER`, and the `REPO_NAME` from the last path segment. It may differ from `BINARY_NAME`, e.g. `liferay-workspace-updater` installs `lwu`.)
 
-Then confirm the tag `v{{VERSION}}` exists (`git tag --list v{{VERSION}}`). If it does not, stop: the `Cargo.toml` version must be bumped and tagged first (the Release workflow rejects tags that don't match `Cargo.toml`).
+Then confirm the tag `v{{VERSION}}` exists (`git tag --list v{{VERSION}}`). If it does not, stop: the release must be tagged first (see the Releasing section of `README.md`). The Release workflow rejects tags that don't match `Cargo.toml`.
 
 ### 2. Prepare Template Values
-- **Class Name:** Convert `REPO_NAME` to PascalCase/CamelCase (e.g., `lfr-local` -> `LfrLocal`) for the `CLASS_NAME`.
+- **Class Name:** Convert `BINARY_NAME` to PascalCase/CamelCase (e.g., `lfr-local` -> `LfrLocal`) for the `CLASS_NAME`.
 - **Release URL:** `https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/archive/refs/tags/v{{VERSION}}.tar.gz`
 - **Calculate SHA256:**
-  *Wait for user confirmation that the release is published.* Then run:
+  *First, verify the release exists:*
   ```bash
-  curl -sL <Release URL> | shasum -a 256
+  curl -Is <Release URL> | head -n 1
+  ```
+  If it returns 200, calculate the hash (extracting just the hex string):
+  ```bash
+  curl -sL <Release URL> | shasum -a 256 | cut -d ' ' -f 1
   ```
   This is your `{{SHA256}}`.
 
 ---
 
 ### 3. Update Homebrew (macOS/Linux)
-- **Locate Tap:** Find the local path to the `homebrew-tap` repo (default: `../homebrew-tap`).
-- **Generate Formula:** Read `formula.rb.example`, replace placeholders, and write to `<homebrew-tap-path>/Formula/{{REPO_NAME}}.rb`.
+- **Locate & Verify Tap:** Find the local path to the `homebrew-tap` repo (default: `../homebrew-tap`). Verify it is a git repository:
+  ```bash
+  [ -d "../homebrew-tap/.git" ] && echo "Tap found" || echo "Tap NOT found"
+  ```
+  *If not found, ask the user for the correct path before proceeding.*
+- **Generate Formula:** Read `formula.rb.example`, replace placeholders, and write to `<homebrew-tap-path>/Formula/{{BINARY_NAME}}.rb`.
 - **Commit & Push:**
   ```bash
   cd <homebrew-tap-path>
-  git add Formula/{{REPO_NAME}}.rb
-  git commit -m "feat: update {{REPO_NAME}} v{{VERSION}}"
+  git add Formula/{{BINARY_NAME}}.rb
+  git commit -m "feat: update {{BINARY_NAME}} v{{VERSION}}"
   git push origin main
   ```
 
 ---
 
 ### 4. Update Scoop (Windows)
-The bucket's `auto-update.yml` workflow updates existing manifests from new GitHub releases, so this step is only needed when `bucket/{{REPO_NAME}}.json` does not exist yet. If it already exists, skip this step.
+The bucket's `auto-update.yml` workflow updates existing manifests from new GitHub releases, so this step is only needed when `bucket/{{BINARY_NAME}}.json` does not exist yet. If it already exists, skip this step.
 
-- **Locate Bucket:** Find the local path to the `scoop-bucket` repo (default: `../scoop-bucket`).
-- **Generate Manifest:** Read `scoop.json.example`, replace placeholders, and write to `<scoop-bucket-path>/bucket/{{REPO_NAME}}.json`.
+- **Locate & Verify Bucket:** Find the local path to the `scoop-bucket` repo (default: `../scoop-bucket`). Verify it is a git repository:
+  ```bash
+  [ -d "../scoop-bucket/.git" ] && echo "Bucket found" || echo "Bucket NOT found"
+  ```
+  *If not found, ask the user for the correct path before proceeding.*
+- **Generate Manifest:** Read `scoop.json.example`, replace placeholders, and write to `<scoop-bucket-path>/bucket/{{BINARY_NAME}}.json`.
 - **Commit & Push:**
   ```bash
   cd <scoop-bucket-path>
-  git add bucket/{{REPO_NAME}}.json
-  git commit -m "feat: update {{REPO_NAME}} v{{VERSION}}"
+  git add bucket/{{BINARY_NAME}}.json
+  git commit -m "feat: update {{BINARY_NAME}} v{{VERSION}}"
   git push origin main
   ```
+
+---
+
+### 5. Keep the Templates
+Do **not** delete `formula.rb.example` or `scoop.json.example`. They are needed for every future release.
 
 ---
 

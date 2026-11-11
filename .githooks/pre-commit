@@ -1,0 +1,41 @@
+#!/bin/sh
+set -e
+
+# Check for unresolved template placeholders
+if command -v python3 >/dev/null 2>&1; then
+    if [ -f "scripts/doctor.py" ]; then
+        echo "Running doctor placeholder check..."
+        python3 scripts/doctor.py
+    fi
+fi
+
+# Format Rust files (staged only)
+# This uses the built-in git shell which is available on Windows/Git Bash and Unix
+echo "Formatting Rust files..."
+cargo fmt --all
+
+# Re-stage any files that cargo fmt might have touched
+# This is safe because it only re-adds files that were already staged (cached)
+git diff --cached --name-only --diff-filter=ACMR | grep "\.rs$" | while read -r file; do
+    git add "$file"
+done
+
+# Run Clippy (Rust Linter)
+# Only run if there are staged Rust files
+if git diff --cached --name-only --diff-filter=ACMR | grep -q "\.rs$"; then
+    echo "Running Clippy..."
+    # --all-targets includes tests/benches, -D warnings fails on any lint violation
+    cargo clippy --all-targets --all-features -- -D warnings
+fi
+
+# Format Documentation (Markdown, JSON, YAML)
+if command -v npx >/dev/null 2>&1; then
+    STAGED_DOCS=$(git diff --cached --name-only --diff-filter=ACMR | grep -E "\.(md|yaml|yml|json)$" || true)
+    if [ -n "$STAGED_DOCS" ]; then
+        echo "Formatting documentation with Prettier..."
+        npx prettier --write $STAGED_DOCS
+        echo "$STAGED_DOCS" | while read -r file; do
+            git add "$file"
+        done
+    fi
+fi
