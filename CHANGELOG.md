@@ -7,10 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.0.3] - 2026-11-11
+
 ### Changed
 
 - Upgrade `jsonschema` to 0.60, pinning validation to Draft 7 (the previous implicit default).
 - Label Dependabot pull requests `no-issue-needed`, alongside the default `dependencies` and ecosystem labels, so bot PRs are marked as intentionally having no linked issue.
+- Update Rust dependencies:
+  - `tempfile` 3.26.0 → 3.27.0
+  - `serde` 1.0.228 → 1.0.229
+  - `base64` 0.21.7 → 0.23.1
+  - `reqwest` 0.11.27 → 0.13.5
+  - `chrono` 0.4.44 → 0.4.45
+- Update GitHub Actions:
+  - `actions/upload-artifact` 7.0.1 → 7.0.2
+  - `actions/download-artifact` 8.0.1 → 8.0.2
+  - `dtolnay/rust-toolchain` (pinned commit updated)
 
 ## [1.0.2] - 2026-11-11
 
