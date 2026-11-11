@@ -1,6 +1,6 @@
 [package]
 name = "lfr-mock-gen"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 authors = ["Peter Richards"]
 description = "Liferay Mock Content Generator - Blazing-fast CLI tool using Gemini AI to generate realistic mock Web Content."
