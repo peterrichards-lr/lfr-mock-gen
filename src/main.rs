@@ -233,6 +233,29 @@ fn normalize_structure_to_schema(structure: &serde_json::Value) -> serde_json::V
     })
 }
 
+/// Compiles the generated schema. Draft 7 is pinned explicitly because the
+/// schema carries no `$schema` and that was the implicit default before
+/// jsonschema 0.60 (which now defaults to 2020-12).
+fn compile_schema(schema: &serde_json::Value) -> anyhow::Result<jsonschema::Validator> {
+    jsonschema::draft7::new(schema).map_err(|e| anyhow::anyhow!("Invalid schema generated: {}", e))
+}
+
+/// Validates an article, returning every validation error message on failure.
+fn validate_article(
+    validator: &jsonschema::Validator,
+    article: &serde_json::Value,
+) -> Result<(), Vec<String>> {
+    let errors: Vec<String> = validator
+        .iter_errors(article)
+        .map(|e| e.to_string())
+        .collect();
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
+    }
+}
+
 /// Handles fetching data from Gemini and pushing it to Liferay
 #[allow(clippy::too_many_arguments)]
 async fn generate_mock_data(
@@ -322,8 +345,7 @@ async fn generate_mock_data(
     })?;
 
     // 3. Validate response against schema
-    let compiled_schema = jsonschema::JSONSchema::compile(&schema)
-        .map_err(|e| anyhow::anyhow!("Invalid schema generated: {}", e))?;
+    let compiled_schema = compile_schema(&schema)?;
 
     println!(
         "Successfully generated {} articles. Validating and pushing to Liferay...",
@@ -338,8 +360,7 @@ async fn generate_mock_data(
 
     for article in articles {
         // Validate against schema
-        if let Err(errors) = compiled_schema.validate(&article) {
-            let err_msgs: Vec<String> = errors.map(|e| e.to_string()).collect();
+        if let Err(err_msgs) = validate_article(&compiled_schema, &article) {
             eprintln!(
                 "⚠️ Skipping article due to schema validation errors: {:?}",
                 err_msgs
@@ -413,4 +434,46 @@ async fn generate_mock_data(
 
     println!("\nFinished processing articles!");
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_schema() -> serde_json::Value {
+        normalize_structure_to_schema(&json!({
+            "contentStructureFields": [
+                { "name": "price", "label": "Price", "dataType": "double" },
+                { "name": "inStock", "label": "In Stock", "dataType": "boolean" },
+                { "name": "body", "label": "Body", "dataType": "string" }
+            ]
+        }))
+    }
+
+    #[test]
+    fn valid_article_passes_validation() {
+        let validator = compile_schema(&sample_schema()).unwrap();
+        let article = json!({
+            "title": "Hello",
+            "description": "Summary",
+            "price": 9.99,
+            "inStock": true,
+            "body": "Text"
+        });
+        assert!(validate_article(&validator, &article).is_ok());
+    }
+
+    #[test]
+    fn invalid_article_reports_all_errors() {
+        let validator = compile_schema(&sample_schema()).unwrap();
+        // Missing required title, wrong types for price and inStock.
+        let article = json!({
+            "price": "cheap",
+            "inStock": "yes",
+            "body": "Text"
+        });
+        let errors = validate_article(&validator, &article).unwrap_err();
+        assert_eq!(errors.len(), 3, "unexpected errors: {errors:?}");
+        assert!(errors.iter().any(|e| e.contains("title")));
+    }
 }
