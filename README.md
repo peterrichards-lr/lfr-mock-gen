@@ -71,7 +71,6 @@ lfr-mock-gen <COMMAND> --help
 | Command | Description |
 | :--- | :--- |
 | `data` | Generate mock Web Content with Gemini and create it in a Liferay site. |
-| `env` | Report the Liferay project found from the current directory. |
 
 Global options: `-h, --help` and `-V, --version`.
 
@@ -98,14 +97,17 @@ lfr-mock-gen data \
 | `--liferay-user <USER>` | Yes | Username for HTTP Basic authentication, e.g. `test@liferay.com`. |
 | `--liferay-pass <PASSWORD>` | Yes | Password for HTTP Basic authentication. |
 | `--group-id <ID>` | Yes | Site ID (`groupId`) to create the content in. |
-| `--structure-id <ID or NAME>` | Yes | Content structure to generate entries for, matched against the structure's ID or its exact name. |
+| `--structure-id <ID or NAME>` | Yes | Content structure to generate entries for: a numeric structure ID, or the structure's exact name. |
+| `--global-site-id <ID>` | No | ID of the Global site, searched when a structure name isn't found in `--group-id`. Normally resolved automatically; set it only if that fails. |
 | `--tone <TONE>` | No | Tone of the generated content. Default: `professional`. |
 | `--purpose <PURPOSE>` | No | Kind of content, e.g. Blog, FAQ, News, Events. Default: `Blog`. |
-| `--force` | No | Accepted but currently has no effect. |
 
 **What a run does:**
 
-1. Lists the site's content structures (`/o/headless-delivery/v1.0/sites/{groupId}/content-structures`) and picks the one whose ID or name matches `--structure-id`. The run stops if none matches.
+1. Finds the content structure named by `--structure-id`:
+   - A numeric value is fetched directly (`/o/headless-delivery/v1.0/content-structures/{id}`), which works for a structure in any site. If no structure has that ID, the value is looked up as a name.
+   - A name is matched exactly against every page of the site's structures (`/o/headless-delivery/v1.0/sites/{groupId}/content-structures`), then of the Global site's structures, where Liferay keeps shared structures such as "Basic Web Content". The Global site's ID is resolved with `/o/headless-admin-user/v1.0/sites/by-friendly-url-path/global`, unless `--global-site-id` is given.
+   - The run stops if no structure matches, naming the sites that were searched.
 2. Turns the structure's fields into a JSON Schema (plus `title` and `description`).
 3. Asks Gemini (`gemini-2.0-flash`) for **5** entries that follow the schema, using `--tone` and `--purpose`.
 4. Validates each entry and creates the valid ones as structured content (`/o/headless-delivery/v1.0/sites/{groupId}/structured-contents`) with the keyword `ai-generated`. Entries that fail validation or are rejected by Liferay are reported and skipped.
@@ -116,14 +118,6 @@ Run the command again to create more entries.
 
 - The Gemini API key is read from the environment variable named by `--api-env`, so the key never appears on the command line. The run fails if that variable isn't set.
 - Liferay credentials are passed as `--liferay-user` and `--liferay-pass` and sent with HTTP Basic authentication. To keep the password out of your shell history, read it from an environment variable as in the example above.
-
-### `env`: inspect the local Liferay project
-
-```bash
-lfr-mock-gen env [--target <TARGET>]
-```
-
-Searches upwards from the current directory for a Liferay project (a Liferay Workspace, a Liferay Cloud repository or a client extension) and prints its root, project type, Liferay version (from `liferay.workspace.product` in `gradle.properties`) and the Tomcat directory under `bundles`, when found. `--target` is echoed in the output but doesn't change what is checked. This command doesn't contact Liferay or Gemini.
 
 ## Releasing
 

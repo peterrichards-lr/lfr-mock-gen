@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+
+- `data --global-site-id` to set the Global site's ID when it can't be resolved automatically.
+
+### Removed
+
+- **Breaking:** the `env` subcommand, which only reported local project details and is unrelated to generating content. Scripts that call `lfr-mock-gen env` must be updated.
+- **Breaking:** the `data --force` flag, which had no effect. Remove it from existing commands, which otherwise fail with an unknown-argument error.
+- Unused code and dependencies: the workspace detection, XML and git helpers, and the `edit-xml`, `base64`, `chrono`, `dialoguer`, `sysinfo` and `tempfile` crates.
+
+### Fixed
+
+- Content structure lookup in `data`:
+  - A numeric `--structure-id` is fetched directly, so structures from any site, including the Global site, are found.
+  - Name lookup reads every page of the site's structures instead of only the first 20.
+  - Names not found in the site are looked up in the Global site, so shared structures such as "Basic Web Content" are found.
+  - The "not found" error names the sites that were searched.
 
 ## [1.0.3] - 2026-11-11
 

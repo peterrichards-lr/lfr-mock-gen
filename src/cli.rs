@@ -10,14 +10,8 @@ pub struct App {
 
 #[derive(Subcommand)]
 pub enum AppCommands {
-    Env {
-        #[arg(short, long)]
-        target: Option<String>,
-    },
+    /// Generate mock Web Content with Gemini and create it in a Liferay site
     Data {
-        #[arg(long, help = "Force operation")]
-        force: bool,
-
         #[arg(long, help = "Environment variable name containing the Gemini API key")]
         api_env: String,
 
@@ -35,6 +29,12 @@ pub enum AppCommands {
 
         #[arg(long, help = "Liferay Content Structure ID or Name")]
         structure_id: String,
+
+        #[arg(
+            long,
+            help = "Global site ID to search for the structure, if it cannot be resolved automatically"
+        )]
+        global_site_id: Option<u64>,
 
         #[arg(
             long,
