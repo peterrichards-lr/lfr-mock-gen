@@ -33,6 +33,14 @@ Then confirm the tag `v{{VERSION}}` exists (`git tag --list v{{VERSION}}`). If i
 ---
 
 ### 3. Update Homebrew (macOS/Linux)
+The tap's `update-formulas.yml` workflow updates existing formulas from new GitHub releases every 2 hours, so this step is only needed when `Formula/{{BINARY_NAME}}.rb` does not exist yet. If it already exists, skip this step. For a new formula, also add an `Update {{BINARY_NAME}}` step to the tap's `.github/workflows/update-formulas.yml`:
+```yaml
+steps:
+  # ...existing steps, before "Update README"...
+  - name: Update {{BINARY_NAME}}
+    run: ./scripts/update-formula.sh {{BINARY_NAME}} {{GITHUB_USER}}/{{REPO_NAME}}
+```
+
 - **Locate & Verify Tap:** Find the local path to the `homebrew-tap` repo (default: `../homebrew-tap`). Verify it is a git repository:
   ```bash
   [ -d "../homebrew-tap/.git" ] && echo "Tap found" || echo "Tap NOT found"
@@ -42,7 +50,7 @@ Then confirm the tag `v{{VERSION}}` exists (`git tag --list v{{VERSION}}`). If i
 - **Commit & Push:**
   ```bash
   cd <homebrew-tap-path>
-  git add Formula/{{BINARY_NAME}}.rb
+  git add Formula/{{BINARY_NAME}}.rb .github/workflows/update-formulas.yml
   git commit -m "feat: update {{BINARY_NAME}} v{{VERSION}}"
   git push origin main
   ```
