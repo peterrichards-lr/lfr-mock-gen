@@ -23,7 +23,7 @@ edit-xml = "0.1"
 anyhow = "1.0"
 
 # JSON Schema Validation
-jsonschema = "0.17"
+jsonschema = "0.60"
 
 # Configuration & Data
 serde = { version = "1.0", features = ["derive"] }
