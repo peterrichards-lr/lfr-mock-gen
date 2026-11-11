@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "lfr-mock-gen")]
-#[command(about = "Liferay Mock Content Generator via Gemini", long_about = None)]
+#[command(version, about = "Liferay Mock Content Generator via Gemini", long_about = None)]
 pub struct App {
     #[command(subcommand)]
     pub command: AppCommands,
