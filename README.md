@@ -16,3 +16,30 @@ Compile the application for release to ensure maximum performance:
 
 ```bash
 cargo build --release
+```
+
+### Install via Homebrew (macOS / Linux)
+
+```bash
+brew tap peterrichards-lr/tap
+brew install lfr-mock-gen
+```
+
+### Install via Scoop (Windows)
+
+```powershell
+scoop bucket add peterrichards-lr https://github.com/peterrichards-lr/scoop-bucket
+scoop install lfr-mock-gen
+```
+
+Installing via Homebrew or Scoop builds from source, which avoids "Unidentified Developer" warnings on macOS and gives a user-level installation on Windows.
+
+### Releasing
+
+1. Bump `version` in `Cargo.toml`, run `cargo build` to update `Cargo.lock`, and commit.
+2. Tag the commit with the matching version and push it: `git tag v1.2.3 && git push origin v1.2.3`. The Release workflow fails if the tag doesn't match `Cargo.toml`.
+3. Update the Homebrew tap (and, for a first release, the Scoop bucket) from `formula.rb.example` and `scoop.json.example`. The Gemini prompt in `.gemini/prompts/update-distribution-channels.md` automates this:
+   ```bash
+   "Please execute the steps in .gemini/prompts/update-distribution-channels.md to update my distribution repositories"
+   ```
+   The Scoop bucket picks up later releases automatically.
