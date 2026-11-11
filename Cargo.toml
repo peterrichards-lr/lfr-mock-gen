@@ -9,7 +9,7 @@ license = "MIT"
 
 [dependencies]
 # HTTP & Async
-reqwest = { version = "0.11", features = ["json", "blocking"] }
+reqwest = { version = "0.13", features = ["json", "blocking"] }
 tokio = { version = "1", features = ["full"] }
 base64 = "0.23"
 
