@@ -1,0 +1,26 @@
+{
+    "version": "{{VERSION}}",
+    "description": "{{DESCRIPTION}}",
+    "homepage": "https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}",
+    "license": "MIT",
+    "url": "https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/archive/refs/tags/v{{VERSION}}.tar.gz",
+    "hash": "{{SHA256}}",
+    "extract_dir": "{{REPO_NAME}}-{{VERSION}}",
+    "depends": "rustup",
+    "installer": {
+        "script": [
+            "Set-Location \"$dir\"",
+            "cargo install --path . --root \"$dir\""
+        ]
+    },
+    "bin": "bin/{{BINARY_NAME}}.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "url": "https://github.com/{{GITHUB_USER}}/{{REPO_NAME}}/archive/refs/tags/v$version.tar.gz",
+        "extract_dir": "{{REPO_NAME}}-$version",
+        "hash": {
+            "url": "$url",
+            "mode": "download"
+        }
+    }
+}

@@ -1,9 +1,11 @@
 [package]
 name = "lfr-mock-gen"
-version = "0.1.0"
+version = "1.0.1"
 edition = "2021"
 authors = ["Peter Richards"]
 description = "Liferay Mock Content Generator - Blazing-fast CLI tool using Gemini AI to generate realistic mock Web Content."
+repository = "https://github.com/peterrichards-lr/lfr-mock-gen"
+license = "MIT"
 
 [dependencies]
 # HTTP & Async
