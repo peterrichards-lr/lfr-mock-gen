@@ -8,6 +8,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # Explicit `labels:` replaces GitHub's automatic labels rather than adding
+    # to them, so the defaults are re-listed alongside no-issue-needed, which
+    # marks bot PRs as intentionally having no linked issue.
+    labels:
+      - "dependencies"
+      - "github_actions"
+      - "no-issue-needed"
     commit-message:
       prefix: "ci"
       include: "scope"
@@ -18,6 +25,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    # Explicit `labels:` replaces GitHub's automatic labels rather than adding
+    # to them, so the defaults are re-listed alongside no-issue-needed, which
+    # marks bot PRs as intentionally having no linked issue.
+    labels:
+      - "dependencies"
+      - "rust"
+      - "no-issue-needed"
     commit-message:
       prefix: "deps"
       include: "scope"
